@@ -17,7 +17,7 @@ fn main() {
 ```
 ```
 Operation took 1003ms
-I still have ownership of Definied in macro!!!
+I still have ownership of Defined in macro!!!
 ```
 
 
