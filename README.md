@@ -1,5 +1,7 @@
 # time-it
 
+macros defined [here](https://github.com/tStreichenberger/time-it-macros)
+
 ## Example
 
 ```
