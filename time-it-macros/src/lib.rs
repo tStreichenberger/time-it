@@ -12,7 +12,14 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
     quote! {
         let start = std::time::Instant::now();
         #to_time
-        println!("Operation took {}ms", start.elapsed().as_millis())
+        let duration = start.elapsed();
+
+        let config = time_it::get_config();
+        let read = config.read().unwrap();
+        match read.action {
+            Some(ref action) => action(duration),
+            None => println!("No action defined"),
+        }
     }
     .into()
 }

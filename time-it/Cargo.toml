@@ -6,3 +6,4 @@ edition = "2021"
 
 [dependencies]
 time-it-macros = {path = "../time-it-macros"}
+time-it-builder = {path = "../time-it-builder"}
