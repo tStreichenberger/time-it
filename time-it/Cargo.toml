@@ -5,4 +5,4 @@ edition = "2021"
 
 
 [dependencies]
-time-it-macros = {git = "https://github.com/tStreichenberger/time-it-macros"}
+time-it-macros = {path = "../time-it-macros"}

@@ -41,7 +41,6 @@ dependencies = [
 [[package]]
 name = "time-it-macros"
 version = "0.1.0"
-source = "git+https://github.com/tStreichenberger/time-it-macros#47e291ba9b1ee9a3c2731191995e809d076e88fe"
 dependencies = [
  "quote",
  "syn",
