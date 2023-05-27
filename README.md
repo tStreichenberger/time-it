@@ -1,8 +1,10 @@
 # time-it
 
-macros defined [here](https://github.com/tStreichenberger/time-it-macros)
+## Examples
 
-## Example
+Examples found in time-it main lib
+
+### Simple
 
 ```
 cargo run --example simple
@@ -22,6 +24,20 @@ Operation took 1003ms
 I still have ownership of Defined in macro!!!
 ```
 
+### Functions
+
+```
+cargo run --example functions
+```
+
+```
+sleep took 1000ms
+make_post_request took 155ms
+parse_response took 3ms
+Database contains 42 files
+main took 1159ms
+```
+
 
 ## TODO:
-* Add custom message to print
+* Add custom message to print in `time_it!`
