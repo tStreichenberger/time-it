@@ -2,7 +2,7 @@
 
 ## Examples
 
-Examples found in time-it main lib
+Examples found in [time-it main lib](https://github.com/tStreichenberger/time-it/tree/main/time-it)
 
 ### Simple
 
