@@ -1,3 +1,3 @@
 # time-it-macros
 
-macros for [time-it](https://github.com/tStreichenberger/time-it) crate. Look there for docs
+Definitions for `time_it!` and `#[time_fn]`
