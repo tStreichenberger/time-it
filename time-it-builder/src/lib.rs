@@ -1,19 +1,25 @@
-use std::{
-    sync::{Arc, RwLock},
-    time::Duration,
-};
+use lazy_init::Lazy;
+use parking_lot::RwLock;
+use std::{sync::Arc, time::Duration};
 
 lazy_static::lazy_static! {
-    static ref TIMER_CONFIG: Arc<RwLock<TimeItConfig>> = Arc::new(RwLock::new(TimeItConfig::default()));
+    static ref TIMER_CONFIG: RwLock<TimeItConfig> = RwLock::new(TimeItConfig::default());
+    static ref LAZY_TIMER_CONFIG: Lazy<Arc<TimeItConfig>> = Lazy::new();
 }
 
+#[derive(Clone)]
 pub struct TimeItConfig {
-    pub action: Option<Box<dyn Fn(Duration) -> () + Send + Sync>>,
+    pub action: Arc<Box<dyn Fn(Duration) -> () + Send + Sync>>,
 }
 
 impl Default for TimeItConfig {
     fn default() -> Self {
-        TimeItConfig { action: None }
+        TimeItConfig {
+            action: Arc::new(Box::new(|duration| {
+                let time_elapsed = duration.as_millis();
+                println!("[TimeIt] Time elapsed: {}ms", time_elapsed);
+            })),
+        }
     }
 }
 
@@ -27,14 +33,14 @@ impl TimeItBuilder {
     /// This function is called when the timer is done.
     /// The first argument is the name of the timer, the second is the duration.
     pub fn time_it(self, action: Box<dyn Fn(Duration) -> () + Send + Sync>) -> Self {
-        let mut config = TIMER_CONFIG.write().unwrap();
-        config.action = Some(action);
+        let mut config = TIMER_CONFIG.write();
+        config.action = Arc::new(action);
         self
     }
 }
 
-pub fn get_config() -> Arc<RwLock<TimeItConfig>> {
-    TIMER_CONFIG.clone()
+pub fn get_config() -> Arc<TimeItConfig> {
+    Arc::clone(LAZY_TIMER_CONFIG.get_or_create(|| Arc::new(TIMER_CONFIG.read().clone())))
 }
 
 #[cfg(test)]
@@ -47,5 +53,9 @@ mod tests {
             let millis = duration.as_millis();
             println!("[Custom Message] Time Elapsed: {}ms", millis)
         }));
+
+        let config = self::get_config();
+        let action = config.action.clone();
+        action(Duration::from_millis(100));
     }
 }
