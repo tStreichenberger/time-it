@@ -17,9 +17,7 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
         let #start_ident = std::time::Instant::now();
         #to_time
         let duration = #start_ident.elapsed();
-        let config = time_it::get_config();
-        let action = config.action.clone();
-        action(duration);
+        time_it::action(duration);
     }
     .into()
 }
