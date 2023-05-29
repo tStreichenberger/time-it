@@ -1,13 +1,14 @@
-/// # Expected Output: 
+/// # Expected Output:
 /// ```text
 /// Finshed Sleep 1
-/// Operation took 1002ms
+/// [TimeIt] Time elapsed: 1005ms
 /// Finshed Sleep 2
-/// Operation took 1000ms
+/// [TimeIt] Time elapsed: 1004ms
 /// Finshed Sleep 3
-/// Operation took 1000ms
-/// Operation took 3002ms
+/// [TimeIt] Time elapsed: 1000ms
+/// [TimeIt] Time elapsed: 3010ms
 /// ```
+
 fn main() {
     time_it::time_it! {
         time_it::time_it!{

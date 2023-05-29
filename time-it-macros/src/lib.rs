@@ -5,10 +5,7 @@ extern crate syn;
 
 use proc_macro::TokenStream;
 
-use syn::{
-    Ident,
-    parse_macro_input
-};
+use syn::{parse_macro_input, Ident};
 
 #[proc_macro]
 pub fn time_it(to_time: TokenStream) -> TokenStream {
@@ -19,12 +16,11 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
     quote! {
         let #start_ident = std::time::Instant::now();
         #to_time
-        println!("Operation took {}ms", #start_ident.elapsed().as_millis());
+        let duration = #start_ident.elapsed();
+        time_it::action(duration);
     }
     .into()
 }
-
-
 
 // TODO: fix the unused code warning to not reveal inner func
 #[proc_macro_attribute]
@@ -94,7 +90,7 @@ pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
 
     let new_fn_code = parse_macro_input!(new_fn_code_tokens as syn::Block);
 
-    new_fn.block = Box::new(new_fn_code); 
+    new_fn.block = Box::new(new_fn_code);
 
     // write out the two functions
     let new_code: TokenStream = quote! {
@@ -107,10 +103,12 @@ pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
     new_code
 }
 
-
 /// generates a random identifier to be used as the start instant name to avoid overwritting any other vars
 fn get_random_name() -> Ident {
     let random_name = uuid::Uuid::new_v4().to_string().replace("-", "");
 
-    Ident::new(&format!("start_{}", random_name), proc_macro::Span::call_site().into())
+    Ident::new(
+        &format!("start_{}", random_name),
+        proc_macro::Span::call_site().into(),
+    )
 }
