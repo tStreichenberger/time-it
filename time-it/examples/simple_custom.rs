@@ -1,4 +1,3 @@
-
 fn main() {
     time_it::TimeItBuilder::new().time_it(|tag, duration| {
         let millis = duration.as_millis();

@@ -141,7 +141,6 @@ struct TimeItInput {
 
 impl Parse for TimeItInput {
     fn parse(input: ParseStream) -> SynResult<Self> {
-
         let mut tag = None;
 
         let stmts = if input.peek(LitStr) && input.peek2(Token![,]) {
@@ -153,8 +152,7 @@ impl Parse for TimeItInput {
             input.call(Block::parse_within)?
         };
 
-
-        Ok(TimeItInput { tag , stmts })
+        Ok(TimeItInput { tag, stmts })
     }
 }
 
