@@ -17,6 +17,7 @@ use syn::{
     LitStr,
     Result as SynResult,
     Stmt,
+    Item::Verbatim,
     Token,
 };
 
@@ -24,11 +25,10 @@ use syn::{
 pub fn time_it(to_time: TokenStream) -> TokenStream {
     let to_time = parse_macro_input!(to_time as TimeItInput);
 
-    let mut tag_opt = syn::Item::Verbatim(quote!(None).into());
-
-    if let Some(ref tag) = to_time.tag {
-        tag_opt = syn::Item::Verbatim(quote!(Some(#tag)))
-    }
+    let tag_opt = match to_time.tag {
+        Some(ref tag) => Verbatim(quote!(Some(#tag))),
+        None => Verbatim(quote!(None))
+    };
 
     let start_ident = get_random_name();
 
@@ -133,7 +133,6 @@ fn get_random_name() -> Ident {
     )
 }
 
-#[derive(Debug)]
 struct TimeItInput {
     tag: Option<LitStr>,
     stmts: Vec<Stmt>,
