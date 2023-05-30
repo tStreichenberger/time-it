@@ -1,5 +1,0 @@
-[workspace]
-members = [
-    "time-it",
-    "time-it-macros"
-]

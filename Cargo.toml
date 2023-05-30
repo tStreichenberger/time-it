@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "time-it",
+    "time-it-macros",
+    "time-it-builder",
+]
