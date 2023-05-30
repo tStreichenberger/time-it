@@ -1,13 +1,10 @@
 use lazy_init::Lazy;
 use parking_lot::RwLock;
-use std::{
-    sync::Arc,
-    time::Duration,
-};
+use std::time::Duration;
 
 lazy_static::lazy_static! {
     static ref TIMER_CONFIG: RwLock<TimeItConfig> = RwLock::new(TimeItConfig::default());
-    static ref LAZY_TIMER_CONFIG: Lazy<Arc<TimeItConfig>> = Lazy::new();
+    static ref LAZY_TIMER_CONFIG: Lazy<TimeItConfig> = Lazy::new();
 }
 
 type TimeItCallBack = fn(&str, Duration) -> ();
@@ -15,6 +12,7 @@ type TimeItCallBack = fn(&str, Duration) -> ();
 #[derive(Clone)]
 pub struct TimeItConfig {
     pub action: TimeItCallBack,
+    pub default_tag: String,
 }
 
 impl Default for TimeItConfig {
@@ -24,6 +22,7 @@ impl Default for TimeItConfig {
                 let time_elapsed = duration.as_millis();
                 println!("[{tag}] Time elapsed: {}ms", time_elapsed);
             },
+            default_tag: String::from("TimeIt"),
         }
     }
 }
@@ -42,15 +41,21 @@ impl TimeItBuilder {
         config.action = action;
         self
     }
+
+    pub fn default_tag(&self, tag: impl ToString) -> &Self {
+        let mut config = TIMER_CONFIG.write();
+        config.default_tag = tag.to_string();
+        self
+    }
 }
 
-pub fn get_config() -> Arc<TimeItConfig> {
-    Arc::clone(LAZY_TIMER_CONFIG.get_or_create(|| Arc::new(TIMER_CONFIG.read().clone())))
+pub fn get_config() -> &'static TimeItConfig {
+    LAZY_TIMER_CONFIG.get_or_create(|| TIMER_CONFIG.read().clone())
 }
 
-pub fn action(tag: &str, duration: Duration) {
-    let config = LAZY_TIMER_CONFIG.get_or_create(|| Arc::new(TIMER_CONFIG.read().clone()));
-    (config.action)(tag, duration);
+pub fn action(tag: Option<&str>, duration: Duration) {
+    let config = get_config();
+    (config.action)(tag.unwrap_or(&config.default_tag), duration);
 }
 
 #[cfg(test)]

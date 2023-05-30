@@ -20,16 +20,15 @@ use syn::{
     Token,
 };
 
-const DEFAULT_TAG: &str = "TimeIt"; //TODO: make part of config
-
 #[proc_macro]
 pub fn time_it(to_time: TokenStream) -> TokenStream {
     let to_time = parse_macro_input!(to_time as TimeItInput);
 
-    let tag = match to_time.tag {
-        Some(ref tag) => tag.clone(),
-        None => LitStr::new(DEFAULT_TAG, proc_macro::Span::call_site().into())
-    };
+    let mut tag_opt = syn::Item::Verbatim(quote!(None).into());
+
+    if let Some(ref tag) = to_time.tag {
+        tag_opt = syn::Item::Verbatim(quote!(Some(#tag)))
+    }
 
     let start_ident = get_random_name();
 
@@ -37,7 +36,7 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
         let #start_ident = std::time::Instant::now();
         #to_time
         let duration = #start_ident.elapsed();
-        time_it::action(#tag, duration);
+        time_it::action(#tag_opt, duration);
     }
     .into()
 }
@@ -96,13 +95,14 @@ pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
     let start_ident = get_random_name();
 
     let tag = old_name.to_string(); //TODO: allow for optional msg arg
+    let tag = tag.as_str();
 
     // create body of new function which calls old function and converts error
     let new_fn_code_tokens: TokenStream = quote! {
         {
             let #start_ident = std::time::Instant::now();
             let output = #hidden_name #turbofish (#just_args) #maybe_await;
-            time_it::action(#tag, #start_ident.elapsed());
+            time_it::action(Some(#tag), #start_ident.elapsed());
             output
         }
     }
