@@ -1,0 +1,160 @@
+TimeItInput {
+    stmts: [
+        Semi(
+            Macro(
+                ExprMacro {
+                    attrs: [],
+                    mac: Macro {
+                        path: Path {
+                            leading_colon: None,
+                            segments: [
+                                PathSegment {
+                                    ident: Ident {
+                                        ident: "time_it",
+                                        span: #0 bytes(40..47),
+                                    },
+                                    arguments: None,
+                                },
+                                Colon2,
+                                PathSegment {
+                                    ident: Ident {
+                                        ident: "tag",
+                                        span: #0 bytes(49..52),
+                                    },
+                                    arguments: None,
+                                },
+                            ],
+                        },
+                        bang_token: Bang,
+                        delimiter: Paren(
+                            Paren,
+                        ),
+                        tokens: TokenStream [
+                            Literal {
+                                kind: Str,
+                                symbol: "hi theres",
+                                suffix: None,
+                                span: #0 bytes(54..65),
+                            },
+                        ],
+                    },
+                },
+            ),
+            Semi,
+        ),
+        Semi(
+            Call(
+                ExprCall {
+                    attrs: [],
+                    func: Path(
+                        ExprPath {
+                            attrs: [],
+                            qself: None,
+                            path: Path {
+                                leading_colon: None,
+                                segments: [
+                                    PathSegment {
+                                        ident: Ident {
+                                            ident: "std",
+                                            span: #0 bytes(76..79),
+                                        },
+                                        arguments: None,
+                                    },
+                                    Colon2,
+                                    PathSegment {
+                                        ident: Ident {
+                                            ident: "thread",
+                                            span: #0 bytes(81..87),
+                                        },
+                                        arguments: None,
+                                    },
+                                    Colon2,
+                                    PathSegment {
+                                        ident: Ident {
+                                            ident: "sleep",
+                                            span: #0 bytes(89..94),
+                                        },
+                                        arguments: None,
+                                    },
+                                ],
+                            },
+                        },
+                    ),
+                    paren_token: Paren,
+                    args: [
+                        Call(
+                            ExprCall {
+                                attrs: [],
+                                func: Path(
+                                    ExprPath {
+                                        attrs: [],
+                                        qself: None,
+                                        path: Path {
+                                            leading_colon: None,
+                                            segments: [
+                                                PathSegment {
+                                                    ident: Ident {
+                                                        ident: "std",
+                                                        span: #0 bytes(95..98),
+                                                    },
+                                                    arguments: None,
+                                                },
+                                                Colon2,
+                                                PathSegment {
+                                                    ident: Ident {
+                                                        ident: "time",
+                                                        span: #0 bytes(100..104),
+                                                    },
+                                                    arguments: None,
+                                                },
+                                                Colon2,
+                                                PathSegment {
+                                                    ident: Ident {
+                                                        ident: "Duration",
+                                                        span: #0 bytes(106..114),
+                                                    },
+                                                    arguments: None,
+                                                },
+                                                Colon2,
+                                                PathSegment {
+                                                    ident: Ident {
+                                                        ident: "from_millis",
+                                                        span: #0 bytes(116..127),
+                                                    },
+                                                    arguments: None,
+                                                },
+                                            ],
+                                        },
+                                    },
+                                ),
+                                paren_token: Paren,
+                                args: [
+                                    Lit(
+                                        ExprLit {
+                                            attrs: [],
+                                            lit: Int(
+                                                LitInt {
+                                                    token: 100,
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                ],
+                            },
+                        ),
+                    ],
+                },
+            ),
+            Semi,
+        ),
+        Expr(
+            Tuple(
+                ExprTuple {
+                    attrs: [],
+                    paren_token: Paren,
+                    elems: [],
+                },
+            ),
+        ),
+    ],
+}
