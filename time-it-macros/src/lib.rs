@@ -17,11 +17,19 @@ use syn::{
     LitStr,
     Result as SynResult,
     Stmt,
+    Token,
 };
+
+const DEFAULT_TAG: &str = "TimeIt"; //TODO: make part of config
 
 #[proc_macro]
 pub fn time_it(to_time: TokenStream) -> TokenStream {
-    let to_time = syn::Item::Verbatim(to_time.into());
+    let to_time = parse_macro_input!(to_time as TimeItInput);
+
+    let tag = match to_time.tag {
+        Some(ref tag) => tag.clone(),
+        None => LitStr::new(DEFAULT_TAG, proc_macro::Span::call_site().into())
+    };
 
     let start_ident = get_random_name();
 
@@ -29,7 +37,7 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
         let #start_ident = std::time::Instant::now();
         #to_time
         let duration = #start_ident.elapsed();
-        time_it::action(duration);
+        time_it::action(#tag, duration);
     }
     .into()
 }
@@ -87,14 +95,14 @@ pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
 
     let start_ident = get_random_name();
 
-    let msg = old_name.to_string(); //TODO: allow for optional msg arg
+    let tag = old_name.to_string(); //TODO: allow for optional msg arg
 
     // create body of new function which calls old function and converts error
     let new_fn_code_tokens: TokenStream = quote! {
         {
             let #start_ident = std::time::Instant::now();
             let output = #hidden_name #turbofish (#just_args) #maybe_await;
-            println!("{} took {}ms", #msg, #start_ident.elapsed().as_millis());
+            time_it::action(#tag, #start_ident.elapsed());
             output
         }
     }
@@ -125,12 +133,6 @@ fn get_random_name() -> Ident {
     )
 }
 
-#[proc_macro]
-pub fn time_it2(to_time: TokenStream) -> TokenStream {
-    let to_time = parse_macro_input!(to_time as TimeItInput);
-    panic!("{to_time:#?}")
-}
-
 #[derive(Debug)]
 struct TimeItInput {
     tag: Option<LitStr>,
@@ -139,9 +141,20 @@ struct TimeItInput {
 
 impl Parse for TimeItInput {
     fn parse(input: ParseStream) -> SynResult<Self> {
-        let stmts = input.call(Block::parse_within)?;
 
-        Ok(TimeItInput { tag: None, stmts })
+        let mut tag = None;
+
+        let stmts = if input.peek(LitStr) && input.peek2(Token![,]) {
+            tag = Some(input.parse()?);
+            input.parse::<Token![,]>()?;
+            let block = input.parse::<Block>()?;
+            block.stmts
+        } else {
+            input.call(Block::parse_within)?
+        };
+
+
+        Ok(TimeItInput { tag , stmts })
     }
 }
 
