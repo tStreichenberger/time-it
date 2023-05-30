@@ -5,9 +5,14 @@ extern crate syn;
 
 use proc_macro::TokenStream;
 
+use quote::ToTokens;
 use syn::{
+    Result as SynResult,
+    Stmt,
     Ident,
-    parse_macro_input
+    Block,
+    LitStr,
+    parse_macro_input, parse::{Parse, ParseStream}
 };
 
 #[proc_macro]
@@ -113,4 +118,35 @@ fn get_random_name() -> Ident {
     let random_name = uuid::Uuid::new_v4().to_string().replace("-", "");
 
     Ident::new(&format!("start_{}", random_name), proc_macro::Span::call_site().into())
+}
+
+
+
+#[proc_macro]
+pub fn time_it2(to_time: TokenStream) -> TokenStream {
+    let to_time = parse_macro_input!(to_time as TimeItInput);
+    panic!("{to_time:#?}")
+}
+
+#[derive(Debug)]
+struct TimeItInput {
+    tag: Option<syn::LitStr>,
+    stmts: Vec<Stmt>,
+}
+
+impl Parse for TimeItInput {
+    fn parse(input: ParseStream) -> SynResult<Self> {
+        let stmts = input.call(Block::parse_within)?;
+
+        Ok(TimeItInput { stmts })
+    }
+}
+
+
+impl ToTokens for TimeItInput {
+    fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+        self.stmts.iter().for_each(|stmt| {
+            stmt.to_tokens(tokens)
+        })
+    }
 }
