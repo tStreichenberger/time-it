@@ -14,10 +14,10 @@ use syn::{
     parse_macro_input,
     Block,
     Ident,
+    Item::Verbatim,
     LitStr,
     Result as SynResult,
     Stmt,
-    Item::Verbatim,
     Token,
 };
 
@@ -27,7 +27,7 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
 
     let tag_opt = match to_time.tag {
         Some(ref tag) => Verbatim(quote!(Some(#tag))),
-        None => Verbatim(quote!(None))
+        None => Verbatim(quote!(None)),
     };
 
     let start_ident = get_random_name();
