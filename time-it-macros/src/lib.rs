@@ -5,11 +5,30 @@ extern crate syn;
 
 use proc_macro::TokenStream;
 
-use syn::{parse_macro_input, Ident};
+use quote::ToTokens;
+use syn::{
+    parse::{
+        Parse,
+        ParseStream,
+    },
+    parse_macro_input,
+    Block,
+    Ident,
+    Item::Verbatim,
+    LitStr,
+    Result as SynResult,
+    Stmt,
+    Token,
+};
 
 #[proc_macro]
 pub fn time_it(to_time: TokenStream) -> TokenStream {
-    let to_time = syn::Item::Verbatim(to_time.into());
+    let to_time = parse_macro_input!(to_time as TimeItInput);
+
+    let tag_opt = match to_time.tag {
+        Some(ref tag) => Verbatim(quote!(Some(#tag))),
+        None => Verbatim(quote!(None)),
+    };
 
     let start_ident = get_random_name();
 
@@ -17,7 +36,7 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
         let #start_ident = std::time::Instant::now();
         #to_time
         let duration = #start_ident.elapsed();
-        time_it::action(duration);
+        time_it::action(#tag_opt, duration);
     }
     .into()
 }
@@ -75,14 +94,15 @@ pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
 
     let start_ident = get_random_name();
 
-    let msg = old_name.to_string(); //TODO: allow for optional msg arg
+    let tag = old_name.to_string(); //TODO: allow for optional msg arg
+    let tag = tag.as_str();
 
     // create body of new function which calls old function and converts error
     let new_fn_code_tokens: TokenStream = quote! {
         {
             let #start_ident = std::time::Instant::now();
             let output = #hidden_name #turbofish (#just_args) #maybe_await;
-            println!("{} took {}ms", #msg, #start_ident.elapsed().as_millis());
+            time_it::action(Some(#tag), #start_ident.elapsed());
             output
         }
     }
@@ -111,4 +131,32 @@ fn get_random_name() -> Ident {
         &format!("start_{}", random_name),
         proc_macro::Span::call_site().into(),
     )
+}
+
+struct TimeItInput {
+    tag: Option<LitStr>,
+    stmts: Vec<Stmt>,
+}
+
+impl Parse for TimeItInput {
+    fn parse(input: ParseStream) -> SynResult<Self> {
+        let mut tag = None;
+
+        let stmts = if input.peek(LitStr) && input.peek2(Token![,]) {
+            tag = Some(input.parse()?);
+            input.parse::<Token![,]>()?;
+            let block = input.parse::<Block>()?;
+            block.stmts
+        } else {
+            input.call(Block::parse_within)?
+        };
+
+        Ok(TimeItInput { tag, stmts })
+    }
+}
+
+impl ToTokens for TimeItInput {
+    fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+        self.stmts.iter().for_each(|stmt| stmt.to_tokens(tokens))
+    }
 }

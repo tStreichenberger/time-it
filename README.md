@@ -20,7 +20,7 @@ fn main() {
 }
 ```
 ```
-Operation took 1003ms
+[TimeIt] Time elapsed: 1003ms
 I still have ownership of Defined in macro!!!
 ```
 
@@ -31,13 +31,15 @@ cargo run --example functions
 ```
 
 ```
-sleep took 1000ms
-make_post_request took 155ms
-parse_response took 3ms
+[sleep] Time elapsed: 1000ms
+[make_post_request] Time elapsed: 151ms
+[parse_response] Time elapsed: 3ms
 Database contains 42 files
-main took 1159ms
+[main] Time elapsed: 1155ms
 ```
 
 
 ## TODO:
-* Add custom message to print in `time_it!`
+* Add task spawning to handle task action
+* optionally use tokio for this task
+* add optional tag to `#[time_fn]` macro to be called like `#[time_fn("tag")]`

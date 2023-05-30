@@ -1,9 +1,7 @@
-use std::sync::Arc;
-
 fn main() {
-    time_it::TimeItBuilder::new().time_it(|duration| {
+    time_it::TimeItBuilder::new().time_it(|tag, duration| {
         let millis = duration.as_millis();
-        println!("[Custom Message] Time Elapsed: {}ms", millis)
+        println!("Took {}ms for {}", millis, tag)
     });
 
     for _ in 0..6 {
