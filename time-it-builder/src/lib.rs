@@ -1,6 +1,9 @@
 use lazy_init::Lazy;
 use parking_lot::RwLock;
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::Arc,
+    time::Duration,
+};
 
 lazy_static::lazy_static! {
     static ref TIMER_CONFIG: RwLock<TimeItConfig> = RwLock::new(TimeItConfig::default());
