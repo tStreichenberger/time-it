@@ -43,20 +43,23 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
-    let mut func = syn::parse_macro_input!(item as syn::ItemFn);
+    let mut func = parse_macro_input!(item as syn::ItemFn);
     let name = (&func.sig.ident).to_string();
     let name = name.as_str();
 
     let timer_name = get_random_name();
 
-    let start_timer_tokens = quote!{ let #timer_name = time_it::Timer(Some(#name), ::std::time::Instant::now()); }.into();
-    let start_time_stmt = syn::parse_macro_input!(start_timer_tokens as syn::Stmt);
+    let start_timer_tokens =
+        quote! { let #timer_name = ::time_it::Timer(Some(#name), ::std::time::Instant::now()); }
+            .into();
+    let start_time_stmt = parse_macro_input!(start_timer_tokens as Stmt);
 
     func.block.stmts.insert(0, start_time_stmt);
 
     quote! {
         #func
-    }.into()
+    }
+    .into()
 }
 
 /// generates a random identifier to be used as the start instant name to avoid overwritting any other vars

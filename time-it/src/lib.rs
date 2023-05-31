@@ -4,7 +4,6 @@ extern crate time_it_macros;
 pub use time_it_builder::*;
 pub use time_it_macros::*;
 
-
 /// TODO: probably just make this an Option String if we want to make this part of public api
 pub struct Timer(pub Option<&'static str>, pub std::time::Instant);
 
