@@ -1,23 +1,13 @@
-use crossbeam_channel::{
-    bounded,
-    Sender,
-};
+use crossbeam_channel::{unbounded, Sender};
 use lazy_init::Lazy;
 use parking_lot::RwLock;
-use std::sync::atomic::{
-    AtomicBool,
-    Ordering,
-};
-use std::sync::{
-    Arc,
-    Mutex,
-};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
 lazy_static::lazy_static! {
     static ref TIMEIT_CONFIG: RwLock<TimeItConfig> = RwLock::new(TimeItConfig::default());
-    static ref HAHA: Mutex<TimeItConfig> = Mutex::new(TimeItConfig::default());
     static ref LAZY_TIMEIT_CONFIG: Lazy<TimeItConfig> = Lazy::new();
 }
 
@@ -52,7 +42,7 @@ impl Default for TimeItConfig {
             },
             receiver_handle: None,
             default_tag: String::from("TimeIt"),
-            mode: TimeItMode::Async,
+            mode: TimeItMode::Sync,
             sender: None,
             shutdown: Arc::new(AtomicBool::new(false)),
         }
@@ -103,7 +93,7 @@ pub fn get_config() -> &'static TimeItConfig {
         let shutdown = config.shutdown.clone();
         match lazy_config.mode {
             TimeItMode::Async => {
-                let (sender, receiver) = bounded::<TimeItEvent>(100);
+                let (sender, receiver) = unbounded::<TimeItEvent>();
                 let handle = thread::spawn(move || {
                     while !(shutdown.load(Ordering::Relaxed) && receiver.is_empty()) {
                         match receiver.recv() {
@@ -147,12 +137,12 @@ pub fn wait_for_finish() {
     config.wait_for_finish()
 }
 
-pub fn action(tag: Option<&str>, duration: Duration) {
+fn action(tag: Option<&str>, duration: Duration) {
     let config = get_config();
     (config.action)(tag.unwrap_or(&config.default_tag), duration);
 }
 
-pub fn emit(tag: Option<&str>, duration: Duration) {
+fn emit(tag: Option<&str>, duration: Duration) {
     let config = get_config();
     let sender = config.sender.as_ref().unwrap();
     sender

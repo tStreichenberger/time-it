@@ -1,6 +1,6 @@
 #[time_it::main]
-fn main() {
-    time_it::TimeItBuilder::new().time_it(|tag, duration| {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let _time = time_it::TimeItBuilder::new().time_it(|tag, duration| {
         let millis = duration.as_millis();
         std::thread::sleep(std::time::Duration::from_millis(300));
         println!("Took {}ms for {}", millis, tag)
@@ -15,4 +15,6 @@ fn main() {
             });
         }
     });
+
+    Ok(())
 }
