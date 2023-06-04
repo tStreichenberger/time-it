@@ -1,7 +1,13 @@
-use crossbeam_channel::{unbounded, Sender};
+use crossbeam_channel::{
+    unbounded,
+    Sender,
+};
 use lazy_init::Lazy;
 use parking_lot::RwLock;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{
+    AtomicBool,
+    Ordering,
+};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
