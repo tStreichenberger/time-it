@@ -6,20 +6,11 @@ extern crate syn;
 use proc_macro::TokenStream;
 
 use quote::ToTokens;
-use syn::{
-    parse::{
-        Parse,
-        ParseStream,
-    },
-    parse_macro_input,
-    Block,
-    Ident,
-    Item::Verbatim,
-    LitStr,
-    Result as SynResult,
-    Stmt,
-    Token,
-};
+
+use syn::parse::*;
+use syn::Item::*;
+use syn::Result as SynResult;
+use syn::*;
 
 #[proc_macro]
 pub fn time_it(to_time: TokenStream) -> TokenStream {
@@ -36,9 +27,26 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
         let #start_ident = std::time::Instant::now();
         #to_time
         let duration = #start_ident.elapsed();
-        time_it::action(#tag_opt, duration);
+        time_it::run(#tag_opt, duration);
     }
     .into()
+}
+
+#[proc_macro_attribute]
+pub fn main(_: TokenStream, item: TokenStream) -> TokenStream {
+let ast: ItemFn = parse_macro_input!(item as ItemFn);
+    let fn_name = &ast.sig.ident;
+    let fn_return_type = &ast.sig.output;
+    let fn_block = &ast.block;
+    
+    let gen = quote! {
+        fn #fn_name() #fn_return_type {
+            let res = #fn_block;
+            time_it::wait_for_finish();
+            res
+        }
+    };
+    gen.into() 
 }
 
 // TODO: fix the unused code warning to not reveal inner func
@@ -102,7 +110,7 @@ pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
         {
             let #start_ident = std::time::Instant::now();
             let output = #hidden_name #turbofish (#just_args) #maybe_await;
-            time_it::action(Some(#tag), #start_ident.elapsed());
+            time_it::run(Some(#tag), #start_ident.elapsed());
             output
         }
     }
