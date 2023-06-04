@@ -6,20 +6,11 @@ extern crate syn;
 use proc_macro::TokenStream;
 
 use quote::ToTokens;
-use syn::{
-    parse::{
-        Parse,
-        ParseStream,
-    },
-    parse_macro_input,
-    Block,
-    Ident,
-    Item::Verbatim,
-    LitStr,
-    Result as SynResult,
-    Stmt,
-    Token,
-};
+
+use syn::parse::*;
+use syn::Item::*;
+use syn::Result as SynResult;
+use syn::*;
 
 #[proc_macro]
 pub fn time_it(to_time: TokenStream) -> TokenStream {
@@ -36,7 +27,7 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
         let #start_ident = std::time::Instant::now();
         #to_time
         let duration = #start_ident.elapsed();
-        time_it::action(#tag_opt, duration);
+        time_it::run(#tag_opt, duration);
     }
     .into()
 }
@@ -45,7 +36,7 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
 pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
     let mut func = parse_macro_input!(item as syn::ItemFn);
     let name = (&func.sig.ident).to_string();
-    let name = name.as_str();
+    let name = name.as_str(); // TODO: allow custom message as arg to macro
 
     let timer_name = get_random_name();
 
