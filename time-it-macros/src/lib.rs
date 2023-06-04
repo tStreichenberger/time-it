@@ -33,6 +33,23 @@ pub fn time_it(to_time: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
+pub fn main(_: TokenStream, item: TokenStream) -> TokenStream {
+    let ast: ItemFn = parse_macro_input!(item as ItemFn);
+    let fn_name = &ast.sig.ident;
+    let fn_return_type = &ast.sig.output;
+    let fn_block = &ast.block;
+
+    let gen = quote! {
+        fn #fn_name() #fn_return_type {
+            let res = #fn_block;
+            time_it::wait_for_finish();
+            res
+        }
+    };
+    gen.into()
+}
+
+#[proc_macro_attribute]
 pub fn time_fn(_: TokenStream, item: TokenStream) -> TokenStream {
     let mut func = parse_macro_input!(item as syn::ItemFn);
     let name = (&func.sig.ident).to_string();
